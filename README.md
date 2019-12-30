@@ -21,3 +21,18 @@
 ## 사용
 
 - [x] yarn add firebase (npm install firebase)
+
+## Project build
+
+1. yarn run build
+2. npm install -g firebase-tools
+3. firebase login
+4. firebase init
+   <pre>
+       1. select [hosting ...]
+       2. select [existing project...]
+       3. not public -> write "build"
+       4. choice single page app
+       5. Overide -> No.
+   </pre>
+5. firebase deploy --only hosting
