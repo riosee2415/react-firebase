@@ -1,22 +1,35 @@
 import React from "react";
+import { firestore } from "./firebase";
+import TaskAdd from "./components/TaskAdd";
+import TaskDisplay from "./components/TaskDisplay";
 
 class App extends React.Component {
   state = {
-    tasks: [
-      { todo: "work 1" },
-      { todo: "work 2" },
-      { todo: "work 3" },
-      { todo: "work 4" }
-    ],
+    tasks: [],
     task: ""
   };
 
+  componentDidMount() {
+    const tasks = [...this.state.tasks];
+
+    firestore
+      .collection("tasks")
+      .get()
+      .then(docs => {
+        docs.forEach(doc => {
+          tasks.push({
+            todo: doc.data().todo,
+            id: doc.id
+          });
+        });
+        this.setState({
+          tasks
+        });
+      });
+  }
+
   onClickHandler = e => {
     e.preventDefault();
-
-    if (this.state.task.length === 0) {
-      return;
-    }
 
     const task = {
       todo: this.state.task
@@ -37,31 +50,33 @@ class App extends React.Component {
     });
   };
 
+  deleteHandler = idx => {
+    const tasks = this.state.tasks.filter((task, i) => i !== idx);
+
+    this.setState({
+      tasks
+    });
+  };
+
   render() {
     const { task } = this.state;
 
-    const taskDisplay = this.state.tasks.map((task, index) => {
-      return (
-        <div key={index}>
-          <p>{task.todo}</p>
-          <button>DELETE</button>
-        </div>
-      );
-    });
-
-    console.log(taskDisplay);
     return (
       <div className="App">
         {/* INPUT */}
-        <div>
-          <form>
-            <input value={task} onChange={this.onChangeHandler}></input>
-            <button onClick={this.onClickHandler}>SAVE</button>
-          </form>
-        </div>
+        <TaskAdd
+          value={task}
+          changeHandler={this.onChangeHandler}
+          clickHandler={this.onClickHandler}
+        />
 
         {/* OUTPUT */}
-        <div>{taskDisplay}</div>
+        <div>
+          <TaskDisplay
+            tasks={this.state.tasks}
+            deleteHandler={this.deleteHandler}
+          />
+        </div>
       </div>
     );
   }
