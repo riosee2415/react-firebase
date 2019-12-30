@@ -31,16 +31,22 @@ class App extends React.Component {
   onClickHandler = e => {
     e.preventDefault();
 
-    const task = {
-      todo: this.state.task
-    };
+    firestore
+      .collection("tasks")
+      .add({
+        todo: this.state.task
+      })
+      .then(r => {
+        const tasks = [
+          ...this.state.tasks,
+          { todo: this.state.task, id: r.id }
+        ];
 
-    const tasks = [...this.state.tasks, task];
-
-    this.setState({
-      tasks,
-      task: ""
-    });
+        this.setState({
+          tasks,
+          task: ""
+        });
+      });
   };
 
   // to way binding
@@ -50,12 +56,24 @@ class App extends React.Component {
     });
   };
 
-  deleteHandler = idx => {
-    const tasks = this.state.tasks.filter((task, i) => i !== idx);
+  deleteHandler = id => {
+    firestore
+      .collection("tasks")
+      .doc(id)
+      .delete()
+      .then(() => {
+        const tasks = this.state.tasks.filter(task => task.id !== id);
 
-    this.setState({
-      tasks
-    });
+        this.setState({
+          tasks
+        });
+      });
+
+    // const tasks = this.state.tasks.filter((task, i) => i !== idx);
+
+    // this.setState({
+    //   tasks
+    // });
   };
 
   render() {
